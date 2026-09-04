@@ -9,3 +9,6 @@ node_modules/
 # 로그/임시 파일
 *.log
 .DS_Store
+
+# 웹스토어 배포 빌드 산출물 (필요 시 다시 생성)
+dist/
