@@ -1,0 +1,255 @@
+/**
+ * ScroLess 스타일
+ *
+ * 키비주얼(브랜드 색/폰트/톤)은 아래 :root 변수로 정의한다.
+ * 톤을 바꾸려면 이 변수 값들만 교체하면 전체가 한 번에 반영된다.
+ * 모든 클래스는 sl- 접두사를 붙여 대상 페이지 스타일과 충돌을 피한다.
+ *
+ * 브랜드 톤: "빠르고 편안한 정보 탐색"
+ *  - 주색은 신뢰감 있는 딥 틸/블루, 포인트는 밝은 틸.
+ *  - 배경은 눈이 편한 밝은 중성색, 정보 가독성 우선.
+ */
+:root {
+  /* --- 키비주얼 (브랜드 톤: 블랙 + 옐로우) ---
+   * 앱 아이콘 팔레트: #121212 / #FFFFFF / #A7A7A7 / #FFD300
+   * 노란색은 흰 배경 대비가 약하므로, 노란 배경 위에는 검정 글씨(--sl-on-primary)를 쓴다. */
+  --sl-primary: #ffd300;          /* 옐로우 (브랜드 포인트) */
+  --sl-primary-hover: #f2c500;    /* 호버 시 살짝 진한 옐로우 */
+  --sl-accent: #ffd300;
+  --sl-on-primary: #121212;       /* 옐로우 위에 올리는 텍스트/아이콘 색 (검정) */
+  --sl-primary-grad: linear-gradient(135deg, #ffd300 0%, #ffc400 100%);
+
+  --sl-bg: #ffffff;
+  --sl-surface: #f7f7f7;          /* 밝은 중성 표면 */
+  --sl-border: #e4e4e4;
+  --sl-text: #121212;             /* 블랙 텍스트 */
+  --sl-text-muted: #6b6b6b;       /* 그레이 계열 보조 텍스트 */
+  --sl-chip-bg: #f3f3f3;          /* 칩 배경: 중성 그레이 틴트 */
+  --sl-chip-accent: #8a7300;      /* 칩 키 색: 흰 배경에서 읽히는 진한 옐로우-브라운 */
+
+  --sl-dark: #121212;             /* 브랜드 다크 (로고 배지/헤더 강조용) */
+
+  --sl-radius: 12px;
+  --sl-shadow: 0 6px 20px rgba(18, 18, 18, 0.18);
+  --sl-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+    "Malgun Gothic", sans-serif;
+  --sl-z: 2147483000;             /* 대부분의 페이지 요소 위에 뜨도록 */
+}
+
+/* ---------- 플로팅 스마트 인덱스 ---------- */
+.sl-index {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: var(--sl-z);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--sl-bg);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius);
+  box-shadow: var(--sl-shadow);
+  font-family: var(--sl-font);
+  max-width: 220px;
+}
+
+/* 인덱스 헤더: 브랜드 로고 + 접기/펼치기 토글 */
+.sl-index__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.sl-index__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--sl-text);
+  letter-spacing: -0.3px;
+}
+
+/* 로고 마크: 아래로 향하는 "빠른 이동" 셰브론을 담은 배지.
+ * 앱 아이콘과 톤을 맞춰 검정 배지 + 노란 셰브론으로 표현한다. */
+.sl-index__logo {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: var(--sl-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.sl-index__logo svg { display: block; }
+
+.sl-index__toggle {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--sl-text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.sl-index__toggle:hover {
+  background: var(--sl-surface);
+  color: var(--sl-text);
+}
+
+/* 접힌 상태: 항목을 숨기고 헤더만 남긴다 */
+.sl-index.sl-collapsed .sl-index__items {
+  display: none;
+}
+
+.sl-index__items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sl-index__item {
+  appearance: none;
+  border: 1px solid var(--sl-border);
+  background: var(--sl-surface);
+  color: var(--sl-text);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sl-index__item:hover {
+  background: var(--sl-primary-grad);
+  border-color: transparent;
+  color: var(--sl-on-primary);
+  font-weight: 600;
+}
+
+.sl-index__item:focus-visible {
+  outline: 2px solid var(--sl-primary-hover);
+  outline-offset: 2px;
+}
+
+/* ---------- 상단 핵심 정보 요약 칩 ---------- */
+.sl-chips {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--sl-z);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--sl-bg);
+  border: 1px solid var(--sl-border);
+  border-radius: 999px;
+  box-shadow: var(--sl-shadow);
+  font-family: var(--sl-font);
+  max-width: 90vw;
+}
+
+.sl-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 12px;
+  background: var(--sl-chip-bg);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--sl-text);
+  white-space: nowrap;
+}
+
+.sl-chip__key {
+  color: var(--sl-chip-accent);
+  font-weight: 600;
+}
+
+.sl-chip__key::before {
+  content: "#";
+  opacity: 0.7;
+}
+
+.sl-chip__value {
+  font-weight: 600;
+}
+
+.sl-chip__base {
+  color: var(--sl-text-muted);
+  font-size: 11px;
+}
+
+/* ---------- 분석 상태 UI (로딩 / 실패 토스트) ---------- */
+.sl-status {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: var(--sl-z);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--sl-radius);
+  box-shadow: var(--sl-shadow);
+  font-family: var(--sl-font);
+  font-size: 13px;
+  max-width: 300px;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.sl-status--loading {
+  background: var(--sl-bg);
+  border: 1px solid var(--sl-border);
+  color: var(--sl-text);
+}
+
+.sl-status--error {
+  background: #fff5f5;
+  border: 1px solid #f6c6c6;
+  color: #9b2c2c;
+}
+
+.sl-status--hide {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+/* 로딩 스피너 */
+.sl-spinner {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 2px solid var(--sl-chip-bg);
+  border-top-color: var(--sl-primary);
+  border-radius: 50%;
+  animation: sl-spin 0.7s linear infinite;
+}
+
+@keyframes sl-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 접근성: 스크린 리더 전용 텍스트 (원본 이미지는 건드리지 않음) */
+.sl-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

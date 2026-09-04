@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScroLess 테스트 - 긴 상세페이지 상품</title>
+    <style>
+      /* 이 페이지는 "긴 통이미지 상세페이지"를 흉내낸 테스트용 페이지다. */
+      body {
+        margin: 0;
+        font-family: -apple-system, "Malgun Gothic", sans-serif;
+        color: #222;
+      }
+      .product-header {
+        padding: 24px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+      /* 각 구역을 "긴 이미지 한 조각"처럼 큰 높이로 만들어 스크롤이 필요하게 한다. */
+      .zone {
+        min-height: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: #444;
+        border-bottom: 4px dashed #ddd;
+      }
+      #zone-size { background: #eef2ff; }
+      #zone-wearing-black { background: #f3f4f6; }
+      #zone-wearing-ivory { background: #fefce8; }
+      #zone-material { background: #ecfdf5; }
+      #zone-wash { background: #fef2f2; }
+      .hint {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 16px 24px 48px;
+        color: #666;
+        line-height: 1.6;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="product-header">
+      <h1>오버핏 코튼 스웨트셔츠</h1>
+      <p>ScroLess 확장 프로그램 동작 확인용 테스트 상품 페이지</p>
+    </div>
+
+    <p class="hint">
+      이 페이지는 실제 상품처럼 긴 세로 이미지 구역들로 구성되어 있습니다.
+      ScroLess 확장 프로그램이 로드되면 우측에 <b>플로팅 스마트 인덱스</b>가,
+      상단에 <b>핵심 정보 요약 칩</b>이 표시됩니다. 인덱스 버튼을 누르면 해당
+      구역으로 부드럽게 스크롤 이동하는지 확인하세요.
+    </p>
+
+    <!-- mock-data.js 의 targetId 와 각 id 가 매칭된다. -->
+    <section id="zone-size" class="zone">[ 사이즈 및 실측표 이미지 구역 ]</section>
+    <section id="zone-wearing-black" class="zone">[ 블랙 착용샷 이미지 구역 ]</section>
+    <section id="zone-wearing-ivory" class="zone">[ 아이보리 착용샷 이미지 구역 ]</section>
+    <section id="zone-material" class="zone">[ 소재 및 디테일 컷 이미지 구역 ]</section>
+    <section id="zone-wash" class="zone">[ 세탁 및 취급 주의사항 이미지 구역 ]</section>
+  </body>
+</html>

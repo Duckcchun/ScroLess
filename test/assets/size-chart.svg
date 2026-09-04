@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1000" viewBox="0 0 600 1000">
+  <rect width="600" height="1000" fill="#ffffff"/>
+  <text x="40" y="80" font-family="sans-serif" font-size="40" font-weight="bold" fill="#111">SIZE 실측표 (cm)</text>
+  <text x="40" y="140" font-family="sans-serif" font-size="26" fill="#333">소재: 코튼 100%</text>
+  <text x="40" y="180" font-family="sans-serif" font-size="26" fill="#333">핏: 세미 오버핏 / 계절: 봄·가을</text>
+
+  <line x1="40" y1="220" x2="560" y2="220" stroke="#111" stroke-width="2"/>
+  <text x="60"  y="270" font-family="sans-serif" font-size="26" fill="#111">사이즈</text>
+  <text x="230" y="270" font-family="sans-serif" font-size="26" fill="#111">총장</text>
+  <text x="380" y="270" font-family="sans-serif" font-size="26" fill="#111">어깨</text>
+  <line x1="40" y1="290" x2="560" y2="290" stroke="#888" stroke-width="1"/>
+
+  <text x="60"  y="340" font-family="sans-serif" font-size="26" fill="#333">S</text>
+  <text x="230" y="340" font-family="sans-serif" font-size="26" fill="#333">68</text>
+  <text x="380" y="340" font-family="sans-serif" font-size="26" fill="#333">50</text>
+
+  <text x="60"  y="400" font-family="sans-serif" font-size="26" fill="#333">M</text>
+  <text x="230" y="400" font-family="sans-serif" font-size="26" fill="#333">72</text>
+  <text x="380" y="400" font-family="sans-serif" font-size="26" fill="#333">52</text>
+
+  <text x="60"  y="460" font-family="sans-serif" font-size="26" fill="#333">L</text>
+  <text x="230" y="460" font-family="sans-serif" font-size="26" fill="#333">76</text>
+  <text x="380" y="460" font-family="sans-serif" font-size="26" fill="#333">54</text>
+
+  <text x="40" y="600" font-family="sans-serif" font-size="30" font-weight="bold" fill="#111">세탁 방법</text>
+  <text x="40" y="650" font-family="sans-serif" font-size="24" fill="#333">30도 이하 손세탁, 표백제 사용 금지</text>
+  <text x="40" y="690" font-family="sans-serif" font-size="24" fill="#333">건조기 사용 금지, 그늘에서 건조</text>
+</svg>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ScroLess 수집 로직 테스트 (노이즈 포함)</title>
+    <style>
+      body { margin: 0; font-family: sans-serif; }
+      img { display: block; }
+      .detail img { width: 600px; height: 900px; background: #eef; }
+      .banner img, .recommend img, .review img { width: 600px; height: 300px; }
+      .icon img { width: 24px; height: 24px; }
+    </style>
+  </head>
+  <body>
+    <!-- 헤더 로고 (아이콘, 제외되어야 함) -->
+    <header>
+      <span class="icon"><img id="noise-logo" src="assets/noise-logo.png" alt="logo" /></span>
+    </header>
+
+    <!-- 상단 광고 배너 (제외되어야 함) -->
+    <div class="banner">
+      <img id="noise-banner" src="assets/noise-banner.png" alt="ad" />
+    </div>
+
+    <!-- 실제 상세영역 (여기 이미지들만 수집되어야 함) -->
+    <div id="INTRODUCE">
+      <div class="se-main-container detail">
+        <img id="detail-1" src="assets/detail-1.png" alt="상세1" />
+        <img id="detail-2" src="assets/detail-2.png" alt="상세2" />
+        <img id="detail-3" src="assets/detail-3.png" alt="상세3" />
+        <!-- lazy loading: src 는 placeholder, 진짜 URL 은 data-src 에 -->
+        <img
+          id="detail-4-lazy"
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+          data-src="assets/detail-4.png"
+          alt="상세4(lazy)"
+        />
+        <!-- 스크롤 유발형: loading=lazy + data-src, prepareAndCollect 로 승격되어야 함 -->
+        <img
+          id="detail-5-scroll-lazy"
+          loading="lazy"
+          src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+          data-src="assets/detail-5.png"
+          alt="상세5(scroll-lazy)"
+        />
+      </div>
+    </div>
+
+    <!-- 추천상품 (제외되어야 함) -->
+    <div class="recommend">
+      <img id="noise-reco" src="assets/noise-reco.png" alt="추천" />
+    </div>
+
+    <!-- 리뷰 이미지 (제외되어야 함) -->
+    <div class="review">
+      <img id="noise-review" src="assets/noise-review.png" alt="리뷰" />
+    </div>
+
+    <!-- 푸터 (제외되어야 함) -->
+    <footer>
+      <span class="icon"><img id="noise-footer" src="assets/icon-footer.png" alt="footer" /></span>
+    </footer>
+  </body>
+</html>

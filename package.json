@@ -1,0 +1,14 @@
+{
+  "name": "scroless",
+  "version": "0.1.0",
+  "private": true,
+  "description": "쇼핑몰의 긴 통이미지 상세페이지에서 원하는 정보로 즉시 이동하게 해주는 크롬 확장 프로그램",
+  "scripts": {
+    "test": "node test/collect.test.mjs"
+  },
+  "keywords": ["chrome-extension", "ecommerce", "accessibility"],
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^27.0.1"
+  }
+}

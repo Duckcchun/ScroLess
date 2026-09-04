@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "ScroLess - 쇼핑 상세 이미지 인덱싱",
+  "version": "0.1.0",
+  "description": "긴 통이미지 상세페이지에서 사이즈·소재·착용샷 등 원하는 정보로 즉시 이동하는 스마트 인덱스 (MVP)",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/config.js", "src/collect.js", "src/mock-data.js", "src/content.js"],
+      "css": ["src/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": ["http://localhost:8787/*"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "ScroLess",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  }
+}

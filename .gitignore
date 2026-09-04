@@ -1,0 +1,11 @@
+# 의존성
+node_modules/
+
+# 환경변수 (API 키 등 비밀 정보 - 절대 커밋 금지)
+.env
+*.env
+!.env.example
+
+# 로그/임시 파일
+*.log
+.DS_Store
