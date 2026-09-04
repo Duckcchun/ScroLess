@@ -4,6 +4,9 @@
   "description": "ScroLess 백엔드 - 상세이미지를 Gemini로 분석해 {zones, chips} JSON을 반환한다",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"

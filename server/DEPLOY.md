@@ -21,6 +21,28 @@
 > 배포 플랫폼에서는 `.env` 파일 대신 플랫폼의 "환경변수/Secrets" 설정에 넣으세요.
 > 키를 저장소에 커밋하지 마세요. (`.env` 는 이미 `.gitignore` 처리됨)
 
+## 가장 쉬운 방법: Render (무료, 권장)
+
+저장소 루트에 `render.yaml` 이 포함되어 있어 Blueprint 로 거의 자동 배포됩니다.
+
+1. https://render.com 에 GitHub 계정으로 로그인
+2. **New +** > **Blueprint** 선택
+3. 저장소 `Duckcchun/ScroLess` 연결 → Render가 `render.yaml` 을 읽어 서비스를 구성
+4. 배포 과정에서 **GEMINI_API_KEY** 값 입력 (대시보드에서 직접 입력하므로 저장소에 노출 안 됨)
+5. 배포 완료 후 발급된 URL 확인 (예: `https://scroless-backend.onrender.com`)
+6. 헬스체크: 브라우저에서 `https://<발급URL>/health` 열어 `apiKeyConfigured: true` 확인
+7. (선택) 운영 보안: 환경변수 `ALLOWED_ORIGINS` 에 확장 오리진
+   `chrome-extension://<확장ID>` 를 넣으면 그 오리진만 허용됩니다.
+
+> 무료 플랜은 일정 시간 요청이 없으면 슬립 상태가 되어, 첫 요청이 몇 초 지연될 수 있습니다.
+> 실사용 트래픽이 생기면 유료 플랜으로 올리면 슬립이 없어집니다.
+
+### 배포 후 확장 프로그램에 반영
+
+1. `src/config.js` 의 `backendUrl` 을 발급 URL로 변경
+2. `manifest.json` 의 `host_permissions` 에 `"https://<발급URL>/*"` 추가
+3. `src/config.js` 의 `useMockOnly` 를 `false` 로 변경
+
 ## 플랫폼별 요약
 
 일반적인 컨테이너/PaaS 플랫폼(Cloud Run, Render, Railway, Fly.io 등) 공통 절차:

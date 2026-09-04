@@ -18,8 +18,30 @@ import * as cache from "./cache.js";
 const app = express();
 const PORT = process.env.PORT || 8787;
 
-// 확장 프로그램(다른 오리진)에서 호출하므로 CORS 허용
-app.use(cors());
+// CORS: 확장 프로그램(다른 오리진)에서 호출한다.
+// ALLOWED_ORIGINS 환경변수(콤마 구분)가 있으면 그 오리진만 허용하고,
+// 없으면 개발 편의를 위해 모든 오리진을 허용한다.
+// 운영 배포 시에는 확장 오리진("chrome-extension://<확장ID>")을 지정하는 것을 권장한다.
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+if (allowedOrigins.length > 0) {
+  app.use(
+    cors({
+      origin(origin, cb) {
+        // origin 이 없는 요청(서버-서버, 헬스체크 등)은 허용
+        if (!origin || allowedOrigins.includes(origin)) {
+          return cb(null, true);
+        }
+        return cb(new Error("CORS: 허용되지 않은 오리진"));
+      },
+    })
+  );
+} else {
+  app.use(cors());
+}
 app.use(express.json({ limit: "1mb" }));
 
 // 헬스체크
