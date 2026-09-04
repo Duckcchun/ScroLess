@@ -13,11 +13,10 @@
 window.SCROLESS_CONFIG = {
   // 백엔드 주소.
   //  - 로컬 개발: "http://localhost:8787"
-  //  - 배포:      "https://<your-backend-domain>"  (host_permissions 도 함께 수정)
-  backendUrl: "http://localhost:8787",
+  //  - 배포:      "https://scroless-backend.onrender.com"  (host_permissions 도 함께 수정)
+  backendUrl: "https://scroless-backend.onrender.com",
 
   // true 이면 백엔드를 호출하지 않고 mock 데이터만 사용한다.
-  // (백엔드/키 준비 전에도 UI를 확인할 수 있게)
-  // 실제 분석을 쓰려면 false 로 바꾸고 백엔드를 실행하세요.
-  useMockOnly: true,
+  // 실제 배포 백엔드를 사용하므로 false.
+  useMockOnly: false,
 };
