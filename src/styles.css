@@ -191,6 +191,55 @@
   font-size: 11px;
 }
 
+/* ---------- 분석 시작 플로팅 버튼 (FAB) ---------- */
+.sl-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: var(--sl-z);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--sl-dark);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  box-shadow: var(--sl-shadow);
+  font-family: var(--sl-font);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sl-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(18, 18, 18, 0.28);
+}
+.sl-fab:focus-visible {
+  outline: 3px solid var(--sl-primary);
+  outline-offset: 2px;
+}
+.sl-fab__logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--sl-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.sl-fab__logo svg { display: block; }
+.sl-fab--busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+/* 인덱스가 떠 있을 때 FAB 는 살짝 위로 (인덱스와 안 겹치게) */
+.sl-fab.sl-fab--hasindex {
+  bottom: 20px;
+}
+
 /* ---------- 분석 상태 UI (로딩 / 실패 토스트) ---------- */
 .sl-status {
   position: fixed;
