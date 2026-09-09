@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1280" viewBox="0 0 1280 1280">
+  <!-- 정사각 캔버스로 그리되, 콘텐츠를 세로 중앙 720 영역(y 280~1000) 안에 배치한다.
+       이후 sips -c 720 1280 로 중앙 크롭하면 16:9 대표 이미지가 된다. -->
+  <rect width="1280" height="1280" fill="#121212"/>
+
+  <!-- 좌측: 로고 배지 + 텍스트 (세로 중앙 정렬) -->
+  <g transform="translate(110, 470)">
+    <rect x="0" y="0" width="110" height="110" rx="28" fill="#FFD300"/>
+    <g fill="none" stroke="#121212" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="34 36 55 57 76 36"/>
+      <polyline points="34 66 55 87 76 66"/>
+    </g>
+
+    <text x="150" y="58" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif"
+          font-size="80" font-weight="800" fill="#ffffff">ScroLess</text>
+    <text x="152" y="120" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif"
+          font-size="30" fill="#A7A7A7">긴 상세페이지에서 원하는 정보로 바로 이동</text>
+
+    <text x="2" y="228" font-family="-apple-system, 'Apple SD Gothic Neo', sans-serif"
+          font-size="34" font-weight="600" fill="#FFD300">AI가 상세이미지를 읽고, 스마트 인덱스로 점프</text>
+  </g>
+
+  <!-- 우측: 상세페이지 + 강조구역 + 점프 화살표 + 인덱스 점 -->
+  <g transform="translate(870, 400)">
+    <rect x="0" y="0" width="230" height="410" rx="16" fill="#ffffff"/>
+    <rect x="34" y="38" width="162" height="58" rx="8" fill="#e2e2e2"/>
+    <rect x="34" y="116" width="135" height="13" rx="6" fill="#d0d0d0"/>
+    <rect x="34" y="140" width="155" height="13" rx="6" fill="#d0d0d0"/>
+    <rect x="34" y="182" width="162" height="44" rx="8" fill="#FFD300"/>
+    <rect x="34" y="256" width="145" height="13" rx="6" fill="#d0d0d0"/>
+    <rect x="34" y="280" width="125" height="13" rx="6" fill="#d0d0d0"/>
+    <rect x="34" y="330" width="162" height="50" rx="8" fill="#e2e2e2"/>
+
+    <g stroke="#FFD300" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="150" y1="204" x2="270" y2="204"/>
+      <polyline points="256 191 276 204 256 217"/>
+    </g>
+
+    <g fill="#5a5a5a">
+      <circle cx="298" cy="120" r="8"/>
+      <circle cx="298" cy="162" r="8"/>
+      <circle cx="298" cy="204" r="10" fill="#FFD300"/>
+      <circle cx="298" cy="256" r="8"/>
+      <circle cx="298" cy="300" r="8"/>
+    </g>
+  </g>
+</svg>
