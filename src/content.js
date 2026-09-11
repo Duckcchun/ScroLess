@@ -358,7 +358,11 @@
    * 백엔드(/analyze)에 상세이미지를 보내 분석 결과를 받는다.
    * @returns {Promise<{zones:Array, chips:Array}|null>} 실패 시 null
    */
+  // 직전 백엔드 호출의 특수 상태. "rate_limited" 면 사용량 한도(429)에 걸린 것.
+  let lastBackendStatus = null;
+
   async function fetchFromBackend() {
+    lastBackendStatus = null;
     try {
       // lazy loading 이미지를 로드시킨 뒤 수집 (prepareAndCollect 가 있으면 사용)
       if (typeof window.SCROLESS_prepareAndCollect === "function") {
@@ -386,6 +390,10 @@
       if (!res.ok) {
         const errText = await res.text().catch(() => "");
         warn("백엔드 오류 응답:", errText.slice(0, 200));
+        // 429(사용량 한도)는 일시적 상황이므로 별도로 표시해 안내 문구를 바꾼다.
+        if (res.status === 429) {
+          lastBackendStatus = "rate_limited";
+        }
         return null;
       }
       const json = await res.json();
@@ -475,7 +483,11 @@
     }
 
     if (willAnalyze && !usedBackend) {
-      showToast("상품 정보를 찾지 못했어요. 상세정보를 펼친 뒤 다시 시도해 주세요.");
+      if (lastBackendStatus === "rate_limited") {
+        showToast("지금 분석 요청이 많아요. 잠시 후 다시 시도해 주세요.");
+      } else {
+        showToast("상품 정보를 찾지 못했어요. 상세정보를 펼친 뒤 다시 시도해 주세요.");
+      }
     }
 
     if (!data || !Array.isArray(data.zones) || data.zones.length === 0) {

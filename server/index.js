@@ -77,7 +77,21 @@ app.post("/analyze", async (req, res) => {
       return res.json({ ...hit, cached: true });
     }
 
-    const result = await analyzeImages(imageUrls);
+    let result;
+    try {
+      result = await analyzeImages(imageUrls);
+    } catch (err) {
+      // Gemini 사용량 한도(429/quota) 초과는 일시적 상황이므로
+      // 429 로 명확히 구분해 돌려준다. (확장이 "잠시 후 재시도" 안내를 하도록)
+      const msg = String(err && err.message);
+      if (msg.includes("429") || /quota|RESOURCE_EXHAUSTED|rate limit/i.test(msg)) {
+        return res.status(429).json({
+          error: "분석 사용량 한도에 도달했습니다. 잠시 후 다시 시도해 주세요.",
+          retryable: true,
+        });
+      }
+      throw err;
+    }
 
     // 빈 결과(zones/chips 모두 없음)는 캐시하지 않는다.
     // 그렇지 않으면 일시적/부분적 실패가 24시간 동안 고착되어
