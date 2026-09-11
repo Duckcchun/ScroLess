@@ -113,10 +113,26 @@
   function findDetailContainer() {
     const profile = getSiteProfile();
     if (profile) {
+      // 같은 셀렉터에 여러 컨테이너가 매칭될 수 있다(예: 브랜드스토어의
+      // 요약용 .se-main-container + 상세용 .se-main-container).
+      // 첫 번째를 무조건 쓰지 말고, 매칭된 것 중 "이미지를 가장 많이 품은"
+      // 컨테이너를 상세 본문으로 고른다.
       for (const sel of profile.selectors) {
-        const el = document.querySelector(sel);
-        if (el) {
-          return { el, trusted: true };
+        const candidates = Array.from(document.querySelectorAll(sel));
+        if (candidates.length === 0) {
+          continue;
+        }
+        let best = null;
+        let bestCount = -1;
+        candidates.forEach((el) => {
+          const count = el.querySelectorAll("img").length;
+          if (count > bestCount) {
+            best = el;
+            bestCount = count;
+          }
+        });
+        if (best) {
+          return { el: best, trusted: true };
         }
       }
     }
