@@ -28,11 +28,31 @@ function getClient() {
  * @returns {Promise<{inlineData: {mimeType: string, data: string}}>}
  */
 async function fetchImageAsPart(url) {
-  const res = await fetch(url);
+  // 일부 CDN(네이버 등)은 브라우저가 아닌 요청/리퍼러 없는 요청을 차단한다.
+  // 실제 브라우저처럼 보이도록 User-Agent 와 Referer 를 붙여 hotlink 차단을 회피한다.
+  let referer;
+  try {
+    referer = new URL(url).origin + "/";
+  } catch (e) {
+    referer = undefined;
+  }
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+      ...(referer ? { Referer: referer } : {}),
+    },
+  });
   if (!res.ok) {
     throw new Error(`이미지 다운로드 실패 (${res.status}): ${url}`);
   }
   const contentType = res.headers.get("content-type") || "image/jpeg";
+  // 이미지가 아닌 응답(HTML 에러 페이지 등)이 오면 분석에 쓰지 않는다.
+  if (!contentType.startsWith("image/")) {
+    throw new Error(`이미지가 아님 (${contentType}): ${url}`);
+  }
   const buffer = Buffer.from(await res.arrayBuffer());
   return {
     inlineData: {
@@ -85,16 +105,45 @@ export async function analyzeImages(imageUrls) {
 
   const ai = getClient();
 
-  // 이미지들을 병렬로 내려받아 파트로 변환
-  const imageParts = await Promise.all(imageUrls.map(fetchImageAsPart));
+  // 이미지들을 병렬로 내려받되, 일부가 실패해도 나머지로 분석을 진행한다.
+  // (통이미지 10장 중 1장이 404 여도 분석 전체가 실패하지 않도록 = 내구성)
+  const settled = await Promise.allSettled(imageUrls.map(fetchImageAsPart));
+
+  // 성공한 이미지만, "원래 순번(imageIndex)"을 유지한 채 모은다.
+  // 원래 순번을 유지하는 이유: 확장 프로그램이 imageIndex 로 실제 DOM 이미지를
+  // 찾아 스크롤 좌표를 계산하므로, 여기서 순번이 밀리면 엉뚱한 곳으로 이동한다.
+  const kept = [];
+  const failed = [];
+  settled.forEach((r, i) => {
+    if (r.status === "fulfilled") {
+      kept.push({ index: i, part: r.value });
+    } else {
+      failed.push({ index: i, reason: r.reason && r.reason.message });
+    }
+  });
+
+  if (failed.length > 0) {
+    console.warn(
+      `[analyze] 이미지 ${failed.length}/${imageUrls.length}장 다운로드 실패(건너뜀):`,
+      failed.map((f) => `#${f.index} ${f.reason}`).join(" | ")
+    );
+  }
+
+  // 전부 실패했을 때만 에러를 던진다.
+  if (kept.length === 0) {
+    throw new Error(
+      `모든 이미지(${imageUrls.length}장) 다운로드에 실패했습니다. ` +
+        (failed[0] ? `예: ${failed[0].reason}` : "")
+    );
+  }
 
   // 각 이미지 앞에 순번 마커 텍스트를 끼워 넣는다.
   // Gemini 가 "지금 보는 이미지가 몇 번째(imageIndex)인지"를 훨씬 정확히
   // 인식하게 되어, imageIndex/verticalRatio 추정의 오차가 줄어든다.
   const parts = [{ text: ANALYSIS_INSTRUCTION }];
-  imageParts.forEach((part, i) => {
+  kept.forEach(({ index, part }) => {
     parts.push({
-      text: `\n[이미지 imageIndex=${i} / 총 ${imageParts.length}장 중 ${i + 1}번째]`,
+      text: `\n[이미지 imageIndex=${index} / 총 ${imageUrls.length}장 중 ${index + 1}번째]`,
     });
     parts.push(part);
   });
