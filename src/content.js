@@ -15,14 +15,31 @@
 (function () {
   "use strict";
 
-  console.log("[ScroLess] content script 실행됨 (v-debug)", location.href);
+  const config = window.SCROLESS_CONFIG || { useMockOnly: true };
+
+  // 진단 로그: config.debug 가 true 일 때만 출력한다.
+  function log(...args) {
+    if (config && config.debug) {
+      console.log("[ScroLess]", ...args);
+    }
+  }
+  function warn(...args) {
+    if (config && config.debug) {
+      console.warn("[ScroLess]", ...args);
+    }
+  }
+  function error(...args) {
+    if (config && config.debug) {
+      console.error("[ScroLess]", ...args);
+    }
+  }
+
+  log("content script 실행됨", location.href);
 
   // 중복 주입 방지 (SPA 재실행 등)
   if (document.getElementById("scroless-root")) {
     return;
   }
-
-  const config = window.SCROLESS_CONFIG || { useMockOnly: true };
 
   // 현재 렌더링에 사용할 분석 결과. init() 에서 채운다.
   let data = null;
@@ -87,21 +104,15 @@
         const rect = entry.el.getBoundingClientRect();
         const top = rect.top + window.scrollY;
         const y = top + rect.height * ratio;
-        console.log(
-          "[ScroLess] 이동 대상(엘리먼트):",
-          zone.label,
-          "idx=", zone.imageIndex,
-          "ratio=", ratio,
-          "y=", Math.round(y)
-        );
+        log("이동 대상(엘리먼트):", zone.label, "idx=", zone.imageIndex, "ratio=", ratio, "y=", Math.round(y));
         return y - 12;
       }
 
       // 엘리먼트가 사라졌으면(재렌더 등) 수집 당시 기록한 pageY 사용
-      console.log("[ScroLess] 이동 대상(기록된 pageY):", zone.label, "idx=", zone.imageIndex, "y=", entry.pageY);
+      log("이동 대상(기록된 pageY):", zone.label, "idx=", zone.imageIndex, "y=", entry.pageY);
       return entry.pageY - 12;
     }
-    console.warn("[ScroLess] 이동 대상 좌표를 찾지 못함:", zone.label, zone);
+    warn("이동 대상 좌표를 찾지 못함:", zone.label, zone);
     return null;
   }
 
@@ -174,10 +185,16 @@
     root.appendChild(bar);
   }
 
+  // zone 위치 보정/정렬 유틸 (src/zone-utils.js, 브라우저 전역으로 노출됨)
+  const zoneUtils = window.SCROLESS_zoneUtils || {
+    normalizeVerticalRatios: (z) => z,
+    sortZonesByPosition: (z) => z.slice(),
+  };
+
   /** 플로팅 스마트 인덱스 렌더링 */
   function renderIndex(root) {
-    // 이동 가능한 구역만 인덱스에 노출한다.
-    const items = data.zones
+    // 이동 가능한 구역만, 실제 세로 순서로 정렬해 인덱스에 노출한다.
+    const items = zoneUtils.sortZonesByPosition(data.zones)
       .map((zone) => ({ zone, y: resolveTargetY(zone) }))
       .filter((entry) => entry.y !== null);
 
@@ -234,10 +251,10 @@
       btn.className = "sl-index__item";
       btn.textContent = zone.label;
       btn.addEventListener("click", () => {
-        console.log("[ScroLess] 버튼 클릭:", zone.label, zone);
+        log("버튼 클릭:", zone.label, zone);
         // 클릭 시점에 좌표를 다시 계산해 레이아웃 변화에 대응한다.
         const freshY = resolveTargetY(zone);
-        console.log("[ScroLess] 계산된 이동 Y:", freshY);
+        log("계산된 이동 Y:", freshY);
         if (freshY !== null) {
           scrollToY(freshY);
         }
@@ -279,36 +296,36 @@
       } else {
         collectedImages = collectDetailImages();
       }
-      console.log("[ScroLess] 수집된 이미지 수:", collectedImages.length);
-      console.log(
-        "[ScroLess] 수집 이미지 목록:",
+      log("수집된 이미지 수:", collectedImages.length);
+      log(
+        "수집 이미지 목록:",
         collectedImages.map((e) => ({ y: Math.round(e.pageY), url: (e.url || "").slice(-50) }))
       );
       if (collectedImages.length === 0) {
-        console.warn("[ScroLess] 수집된 이미지가 0개 → 백엔드 호출 생략, mock 폴백");
+        warn("수집된 이미지가 0개 → 백엔드 호출 생략, mock 폴백");
         return null;
       }
       const imageUrls = collectedImages.map((entry) => entry.url);
-      console.log("[ScroLess] 백엔드 분석 요청:", config.backendUrl + "/analyze");
+      log("백엔드 분석 요청:", config.backendUrl + "/analyze");
       const res = await fetch(config.backendUrl + "/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imageUrls }),
       });
-      console.log("[ScroLess] 백엔드 응답 status:", res.status);
+      log("백엔드 응답 status:", res.status);
       if (!res.ok) {
         const errText = await res.text().catch(() => "");
-        console.warn("[ScroLess] 백엔드 오류 응답:", errText.slice(0, 200));
+        warn("백엔드 오류 응답:", errText.slice(0, 200));
         return null;
       }
       const json = await res.json();
-      console.log("[ScroLess] 백엔드 분석 결과:", json);
+      log("백엔드 분석 결과:", json);
       if (!json || !Array.isArray(json.zones)) {
         return null;
       }
       return json;
     } catch (e) {
-      console.error("[ScroLess] 백엔드 호출 예외:", e && e.message);
+      error("백엔드 호출 예외:", e && e.message);
       return null;
     }
   }
@@ -375,6 +392,9 @@
       }
       if (!data) {
         data = window.SCROLESS_MOCK || null;
+      }
+      if (data && Array.isArray(data.zones)) {
+        data.zones = zoneUtils.normalizeVerticalRatios(data.zones);
       }
     } finally {
       hideLoading();
@@ -444,7 +464,7 @@
   if (chrome.runtime && chrome.runtime.onMessage) {
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.type === "SCROLESS_ANALYZE") {
-        console.log("[ScroLess] 분석 요청 수신 (툴바 아이콘)");
+        log("분석 요청 수신 (툴바 아이콘)");
         runAnalysis();
       }
     });

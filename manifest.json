@@ -12,7 +12,7 @@
         "https://a-bly.com/*",
         "https://*.a-bly.com/*"
       ],
-      "js": ["src/config.js", "src/collect.js", "src/mock-data.js", "src/content.js"],
+      "js": ["src/config.js", "src/collect.js", "src/zone-utils.js", "src/mock-data.js", "src/content.js"],
       "css": ["src/styles.css"],
       "run_at": "document_idle"
     }

@@ -19,4 +19,7 @@ window.SCROLESS_CONFIG = {
   // true 이면 백엔드를 호출하지 않고 mock 데이터만 사용한다.
   // 실제 배포 백엔드를 사용하므로 false.
   useMockOnly: false,
+
+  // true 이면 콘솔에 [ScroLess] 진단 로그를 출력한다. 문제 진단이 필요할 때만 켜세요.
+  debug: false,
 };

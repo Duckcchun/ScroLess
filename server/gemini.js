@@ -88,6 +88,17 @@ export async function analyzeImages(imageUrls) {
   // 이미지들을 병렬로 내려받아 파트로 변환
   const imageParts = await Promise.all(imageUrls.map(fetchImageAsPart));
 
+  // 각 이미지 앞에 순번 마커 텍스트를 끼워 넣는다.
+  // Gemini 가 "지금 보는 이미지가 몇 번째(imageIndex)인지"를 훨씬 정확히
+  // 인식하게 되어, imageIndex/verticalRatio 추정의 오차가 줄어든다.
+  const parts = [{ text: ANALYSIS_INSTRUCTION }];
+  imageParts.forEach((part, i) => {
+    parts.push({
+      text: `\n[이미지 imageIndex=${i} / 총 ${imageParts.length}장 중 ${i + 1}번째]`,
+    });
+    parts.push(part);
+  });
+
   // 일시적 과부하(503/UNAVAILABLE)에 대비해 지수 백오프로 재시도한다.
   const response = await withRetry(() =>
     ai.models.generateContent({
@@ -95,7 +106,7 @@ export async function analyzeImages(imageUrls) {
       contents: [
         {
           role: "user",
-          parts: [{ text: ANALYSIS_INSTRUCTION }, ...imageParts],
+          parts,
         },
       ],
       config: {
