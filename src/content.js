@@ -361,9 +361,12 @@
   // 직전 백엔드 호출의 특수 상태. "rate_limited" 면 사용량 한도(429)에 걸린 것.
   let lastBackendStatus = null;
 
-  async function fetchFromBackend() {
+  async function fetchFromBackend(setStep) {
     lastBackendStatus = null;
+    const step = typeof setStep === "function" ? setStep : () => {};
     try {
+      // 1단계: 이미지 수집 (lazy 로드 유발 포함)
+      step("collect");
       // lazy loading 이미지를 로드시킨 뒤 수집 (prepareAndCollect 가 있으면 사용)
       if (typeof window.SCROLESS_prepareAndCollect === "function") {
         collectedImages = await window.SCROLESS_prepareAndCollect();
@@ -380,6 +383,8 @@
         return null;
       }
       const imageUrls = collectedImages.map((entry) => entry.url);
+      // 2단계: AI 분석 (백엔드 호출)
+      step("analyze");
       log("백엔드 분석 요청:", config.backendUrl + "/analyze");
       const res = await fetch(config.backendUrl + "/analyze", {
         method: "POST",
@@ -408,17 +413,78 @@
     }
   }
 
-  /** 로딩 인디케이터 표시 (분석 중). 반환값으로 제거 함수를 준다. */
+  /**
+   * 단계별 로딩 인디케이터를 표시한다.
+   * 분석은 (이미지 수집 → AI 분석) 순으로 진행되고, 무료 서버 콜드스타트로
+   * 오래 걸릴 수 있으므로 진행 상황을 문구로 보여줘 "멈춘 건가?" 불안을 줄인다.
+   *
+   * @returns {{ setStep: (key:string)=>void, done: ()=>void }}
+   */
   function showLoading() {
     const el = document.createElement("div");
     el.className = "sl-status sl-status--loading";
     el.setAttribute("role", "status");
     el.setAttribute("aria-live", "polite");
-    el.innerHTML =
-      '<span class="sl-spinner" aria-hidden="true"></span>' +
-      '<span>ScroLess가 상품 정보를 분석하고 있어요…</span>';
+
+    const spinner = document.createElement("span");
+    spinner.className = "sl-spinner";
+    spinner.setAttribute("aria-hidden", "true");
+
+    const textWrap = document.createElement("span");
+    textWrap.className = "sl-status__text";
+
+    const main = document.createElement("span");
+    main.className = "sl-status__main";
+    main.textContent = "상품 이미지를 모으고 있어요…";
+
+    const sub = document.createElement("span");
+    sub.className = "sl-status__sub";
+    sub.textContent = "";
+
+    textWrap.appendChild(main);
+    textWrap.appendChild(sub);
+    el.appendChild(spinner);
+    el.appendChild(textWrap);
     document.body.appendChild(el);
-    return () => el.remove();
+
+    // AI 분석이 길어지면(콜드스타트 등) 안내 문구를 덧붙인다.
+    let slowTimer = null;
+    const clearSlow = () => {
+      if (slowTimer) {
+        clearTimeout(slowTimer);
+        slowTimer = null;
+      }
+    };
+
+    const STEPS = {
+      collect: { main: "상품 이미지를 모으고 있어요…", sub: "" },
+      analyze: {
+        main: "AI가 상품 정보를 분석하고 있어요…",
+        sub: "이미지가 많으면 조금 걸릴 수 있어요",
+      },
+    };
+
+    function setStep(key) {
+      const s = STEPS[key];
+      if (!s) return;
+      main.textContent = s.main;
+      sub.textContent = s.sub;
+      clearSlow();
+      if (key === "analyze") {
+        // 8초 이상 지속되면 서버 준비(콜드스타트) 안내로 문구 갱신
+        slowTimer = setTimeout(() => {
+          sub.textContent = "서버를 깨우는 중이라 조금 더 걸려요…";
+        }, 8000);
+      }
+    }
+
+    return {
+      setStep,
+      done() {
+        clearSlow();
+        el.remove();
+      },
+    };
   }
 
   /** 짧은 실패/알림 토스트 (몇 초 후 자동 사라짐) */
@@ -460,12 +526,13 @@
     data = null;
 
     const willAnalyze = !config.useMockOnly;
-    const hideLoading = showLoading();
+    const loading = showLoading();
 
     let usedBackend = false;
     try {
       if (!config.useMockOnly) {
-        const fromBackend = await fetchFromBackend();
+        // 진행 단계(수집→분석)를 로딩 UI에 반영하도록 콜백을 넘긴다.
+        const fromBackend = await fetchFromBackend(loading.setStep);
         if (fromBackend) {
           data = fromBackend;
           usedBackend = true;
@@ -478,7 +545,7 @@
         data.zones = zoneUtils.normalizeVerticalRatios(data.zones);
       }
     } finally {
-      hideLoading();
+      loading.done();
       analyzing = false;
     }
 

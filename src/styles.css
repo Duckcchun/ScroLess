@@ -380,6 +380,24 @@
   color: var(--sl-text);
 }
 
+/* 로딩 상태 텍스트: 메인 문구 + 보조 안내(작은 회색)를 세로로 */
+.sl-status__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.35;
+}
+.sl-status__main {
+  font-weight: 600;
+}
+.sl-status__sub {
+  font-size: 11px;
+  color: var(--sl-text-muted);
+}
+.sl-status__sub:empty {
+  display: none;
+}
+
 .sl-status--error {
   background: #fff5f5;
   border: 1px solid #f6c6c6;

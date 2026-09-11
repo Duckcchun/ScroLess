@@ -105,6 +105,16 @@
       </div>
     </nav>
 
+    <!-- 로딩 인디케이터(단계별) 미리보기: 실제로는 분석 중에만 잠깐 뜬다.
+         버튼으로 수집중/분석중 문구를 토글해볼 수 있다. -->
+    <div class="sl-status sl-status--loading" role="status" aria-live="polite" style="bottom: 90px;">
+      <span class="sl-spinner" aria-hidden="true"></span>
+      <span class="sl-status__text">
+        <span class="sl-status__main" id="preview-loading-main">AI가 상품 정보를 분석하고 있어요…</span>
+        <span class="sl-status__sub" id="preview-loading-sub">이미지가 많으면 조금 걸릴 수 있어요</span>
+      </span>
+    </div>
+
     <!-- 분석 완료 후의 FAB "다시 분석" 상태 미리보기 -->
     <button id="preview-fab" type="button" class="sl-fab sl-fab--reanalyze" aria-label="ScroLess로 상품 정보 다시 분석하기">
       <span class="sl-fab__logo">
