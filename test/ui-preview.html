@@ -61,30 +61,57 @@
       <div class="sl-index__header">
         <span class="sl-index__brand">
           <span class="sl-index__logo">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="#FFD300" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 5 12 11 18 5"></polyline>
-              <polyline points="6 13 12 19 18 13"></polyline>
-            </svg>
+            <img class="sl-brand-img" src="../icons/icon128.png" alt="" aria-hidden="true" />
           </span>
           <span>ScroLess</span>
         </span>
         <button type="button" class="sl-index__toggle" aria-label="인덱스 접기/펼치기" aria-expanded="true">▾</button>
       </div>
-      <!-- 착용샷이 색상별로 많은 "긴 인덱스" 케이스: 뷰포트를 넘으면 이 목록 안에서 스크롤된다 -->
+      <!-- 착용샷이 색상별로 많은 "긴 인덱스" 케이스: 뷰포트를 넘으면 이 목록 안에서 스크롤된다.
+           각 항목은 실제 content.js 가 만드는 것과 동일하게 [아이콘 span + 라벨 span] 구조다. -->
       <div class="sl-index__items">
-        <button type="button" class="sl-index__item">사이즈 및 실측표</button>
-        <button type="button" class="sl-index__item">블랙 착용샷</button>
-        <button type="button" class="sl-index__item">아이보리 착용샷</button>
-        <button type="button" class="sl-index__item">차콜 착용샷</button>
-        <button type="button" class="sl-index__item">베이지 착용샷</button>
-        <button type="button" class="sl-index__item">카키 착용샷</button>
-        <button type="button" class="sl-index__item">네이비 착용샷</button>
-        <button type="button" class="sl-index__item">브라운 착용샷</button>
-        <button type="button" class="sl-index__item">소재 및 디테일 컷</button>
-        <button type="button" class="sl-index__item">세탁 및 취급 주의사항</button>
+        <button type="button" class="sl-index__item sl-active" aria-current="true">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></svg></span>
+          <span class="sl-index__label">사이즈 및 실측표</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/></svg></span>
+          <span class="sl-index__label">블랙 착용샷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/></svg></span>
+          <span class="sl-index__label">아이보리 착용샷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/></svg></span>
+          <span class="sl-index__label">차콜 착용샷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/></svg></span>
+          <span class="sl-index__label">베이지 착용샷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/></svg></span>
+          <span class="sl-index__label">카키 착용샷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7c3-3 5 3 8 0s5 3 8 0M4 12c3-3 5 3 8 0s5 3 8 0M4 17c3-3 5 3 8 0s5 3 8 0"/></svg></span>
+          <span class="sl-index__label">소재 및 디테일 컷</span>
+        </button>
+        <button type="button" class="sl-index__item">
+          <span class="sl-index__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg></span>
+          <span class="sl-index__label">세탁 및 취급 주의사항</span>
+        </button>
       </div>
     </nav>
+
+    <!-- 분석 완료 후의 FAB "다시 분석" 상태 미리보기 -->
+    <button id="preview-fab" type="button" class="sl-fab sl-fab--reanalyze" aria-label="ScroLess로 상품 정보 다시 분석하기">
+      <span class="sl-fab__logo">
+        <img class="sl-brand-img" src="../icons/icon128.png" alt="" aria-hidden="true" />
+      </span>
+      <span class="sl-fab__label">다시 분석</span>
+    </button>
 
     <script>
       // 접기/펼치기 토글 (미리보기용 - 실제 로직은 content.js 에 있음)
@@ -94,6 +121,19 @@
         var collapsed = panel.classList.toggle("sl-collapsed");
         toggle.setAttribute("aria-expanded", String(!collapsed));
         toggle.textContent = collapsed ? "▸" : "▾";
+      });
+
+      // 항목 클릭 시 활성 하이라이트 이동 (실제 로직은 content.js 클릭 핸들러에 있음)
+      var items = document.querySelectorAll(".sl-index__item");
+      items.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          items.forEach(function (el) {
+            el.classList.remove("sl-active");
+            el.removeAttribute("aria-current");
+          });
+          btn.classList.add("sl-active");
+          btn.setAttribute("aria-current", "true");
+        });
       });
     </script>
   </body>

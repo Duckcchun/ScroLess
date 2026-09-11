@@ -21,8 +21,10 @@
    */
   const SITE_SELECTORS = [
     {
-      // 네이버 스마트스토어 / 쇼핑
-      match: /(smartstore|shopping)\.naver\.com/,
+      // 네이버 스마트스토어 / 브랜드스토어 / 쇼핑
+      // brand.naver.com(브랜드스토어)도 스마트에디터(se-main-container) 기반이라
+      // 동일 셀렉터를 재사용한다.
+      match: /(smartstore|brand|shopping)\.naver\.com/,
       selectors: [
         "#INTRODUCE .se-main-container", // 스마트에디터 본문
         "._1YShY6EQ56", // 상세 설명 영역(변동 가능)

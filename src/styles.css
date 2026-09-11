@@ -80,7 +80,7 @@
   width: 20px;
   height: 20px;
   border-radius: 6px;
-  background: var(--sl-dark);
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -104,11 +104,6 @@
   color: var(--sl-text);
 }
 
-/* 접힌 상태: 항목을 숨기고 헤더만 남긴다 */
-.sl-index.sl-collapsed .sl-index__items {
-  display: none;
-}
-
 .sl-index__items {
   display: flex;
   flex-direction: column;
@@ -120,6 +115,20 @@
   overflow-y: auto;
   /* 스크롤바가 항목 텍스트를 가리지 않게 살짝 여백 */
   padding-right: 2px;
+  /* 접기/펼치기를 부드럽게: max-height 와 opacity 를 트랜지션한다.
+   * (display:none 은 애니메이션이 안 되므로 쓰지 않는다.) */
+  opacity: 1;
+  transition: max-height 0.28s ease, opacity 0.2s ease, margin-top 0.28s ease;
+}
+
+/* 접힌 상태: 항목 영역을 높이 0 으로 접고 헤더만 남긴다.
+ * overflow:hidden 으로 접히는 동안 스크롤바가 보이지 않게 한다. */
+.sl-index.sl-collapsed .sl-index__items {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  /* 헤더와의 간격(gap)까지 함께 접어 완전히 사라진 느낌을 준다 */
+  margin-top: -8px;
 }
 
 /* 인덱스 항목 목록 스크롤바를 브랜드 톤으로 얇게 표시 */
@@ -136,6 +145,7 @@
 
 .sl-index__item {
   appearance: none;
+  position: relative;
   border: 1px solid var(--sl-border);
   background: var(--sl-surface);
   color: var(--sl-text);
@@ -145,7 +155,32 @@
   padding: 9px 12px;
   border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 9px;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* 유형 아이콘: 기본은 브랜드 다크 톤, 호버 시 항목 색(검정)을 그대로 상속 */
+.sl-index__icon {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sl-text-muted);
+  transition: color 0.15s ease;
+}
+.sl-index__icon svg { display: block; }
+
+/* 라벨은 남는 공간을 채우고, 너무 길면 말줄임 */
+.sl-index__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sl-index__item:hover {
@@ -154,10 +189,53 @@
   color: var(--sl-on-primary);
   font-weight: 600;
 }
+.sl-index__item:hover .sl-index__icon {
+  color: var(--sl-on-primary);
+}
 
 .sl-index__item:focus-visible {
   outline: 2px solid var(--sl-primary-hover);
   outline-offset: 2px;
+}
+
+/* 현재 보고 있는(방금 이동한) 구역 표시: 브랜드 다크로 꽉 채운 "선택됨" 상태.
+ * 호버(옐로우)와 색으로 확실히 구분돼 "지금 여기"가 한눈에 읽힌다. */
+.sl-index__item.sl-active {
+  background: var(--sl-dark);
+  border-color: var(--sl-dark);
+  color: #fff;
+  font-weight: 700;
+  /* 오른쪽에 현재위치 인디케이터(옐로우 점)를 놓을 공간 확보 */
+  padding-right: 26px;
+}
+.sl-index__item.sl-active .sl-index__icon {
+  color: var(--sl-primary); /* 다크 배경 위 옐로우 아이콘 */
+}
+/* 오른쪽 끝 "현재 위치" 인디케이터: 옐로우 점 + 은은한 글로우 */
+.sl-index__item.sl-active .sl-index__label {
+  position: relative;
+}
+.sl-index__item.sl-active::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: var(--sl-primary);
+  box-shadow: 0 0 0 3px rgba(255, 211, 0, 0.25);
+}
+/* 활성 항목에 호버하면 다크는 유지하되 살짝 밝혀 "누를 수 있음"을 표현
+ * (활성=다크 유지 → 호버로 옐로우가 되어 선택 상태가 사라져 보이는 혼란 방지) */
+.sl-index__item.sl-active:hover {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+  color: #fff;
+}
+.sl-index__item.sl-active:hover .sl-index__icon {
+  color: var(--sl-primary);
 }
 
 /* ---------- 상단 핵심 정보 요약 칩 ---------- */
@@ -243,16 +321,35 @@
   width: 22px;
   height: 22px;
   border-radius: 6px;
-  background: var(--sl-primary);
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: none;
 }
 .sl-fab__logo svg { display: block; }
+
+/* 로고로 쓰는 실제 앱 아이콘 이미지: 배지 크기에 꽉 차게, 둥근 모서리 유지 */
+.sl-brand-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
 .sl-fab--busy {
   opacity: 0.7;
   pointer-events: none;
+}
+/* 분석 완료 후 "다시 분석" 상태: 인덱스가 이미 떠 있으므로 FAB 는 보조 역할.
+ * 살짝 작고 차분하게 낮춰 인덱스가 주가 되도록 위계를 준다. */
+.sl-fab--reanalyze {
+  padding: 10px 14px;
+  font-size: 13px;
+  opacity: 0.92;
+}
+.sl-fab--reanalyze:hover {
+  opacity: 1;
 }
 /* 인덱스가 떠 있을 때 FAB 는 살짝 위로 (인덱스와 안 겹치게) */
 .sl-fab.sl-fab--hasindex {
@@ -307,6 +404,63 @@
 
 @keyframes sl-spin {
   to { transform: rotate(360deg); }
+}
+
+/* ---------- 등장 애니메이션 ---------- */
+/* 인덱스: 오른쪽에서 부드럽게 슬라이드+페이드 인 */
+@keyframes sl-slide-in-right {
+  from { opacity: 0; transform: translateY(-50%) translateX(16px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+/* 칩 바: 위에서 살짝 내려오며 페이드 인 */
+@keyframes sl-slide-in-top {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+/* FAB: 아래에서 살짝 떠오르며 페이드 인 */
+@keyframes sl-pop-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* 인덱스 항목: 시간차로 하나씩 나타나는 느낌 */
+@keyframes sl-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sl-index {
+  animation: sl-slide-in-right 0.28s ease both;
+}
+.sl-chips {
+  animation: sl-slide-in-top 0.28s ease both;
+}
+.sl-fab {
+  animation: sl-pop-in 0.3s ease both;
+}
+/* 항목마다 약간의 지연을 줘 순차 등장 (앞 6개까지만 스태거, 그 이상은 동시) */
+.sl-index__item {
+  animation: sl-fade-up 0.26s ease both;
+}
+.sl-index__item:nth-child(1) { animation-delay: 0.04s; }
+.sl-index__item:nth-child(2) { animation-delay: 0.08s; }
+.sl-index__item:nth-child(3) { animation-delay: 0.12s; }
+.sl-index__item:nth-child(4) { animation-delay: 0.16s; }
+.sl-index__item:nth-child(5) { animation-delay: 0.20s; }
+.sl-index__item:nth-child(6) { animation-delay: 0.24s; }
+
+/* 접근성: 모션 최소화를 선호하면 모든 등장 애니메이션을 끈다.
+ * (스피너 회전은 로딩 의미 전달에 필요하므로 여기서 끄지 않는다.) */
+@media (prefers-reduced-motion: reduce) {
+  .sl-index,
+  .sl-chips,
+  .sl-fab,
+  .sl-index__item {
+    animation: none;
+  }
+  /* 접기/펼치기 트랜지션도 끄고 즉시 상태만 반영한다 */
+  .sl-index__items {
+    transition: none;
+  }
 }
 
 /* 접근성: 스크린 리더 전용 텍스트 (원본 이미지는 건드리지 않음) */

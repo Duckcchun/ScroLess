@@ -191,6 +191,60 @@
     sortZonesByPosition: (z) => z.slice(),
   };
 
+  // 구역 유형별 SVG 아이콘 (currentColor 를 상속받아 항목 색과 함께 바뀐다).
+  // size=자, wearing=옷걸이/셔츠, material=원단결, wash=물방울.
+  const ZONE_ICONS = {
+    size:
+      '<path d="M3 8h18v8H3z"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/>',
+    wearing:
+      '<path d="M6 4l6 3 6-3 3 5-4 2v9H7v-9L3 9z"/>',
+    material:
+      '<path d="M4 7c3-3 5 3 8 0s5 3 8 0M4 12c3-3 5 3 8 0s5 3 8 0M4 17c3-3 5 3 8 0s5 3 8 0"/>',
+    wash:
+      '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  };
+
+  /**
+   * 브랜드 로고(실제 앱 아이콘) 이미지 엘리먼트를 만든다.
+   * 확장 컨텍스트에서는 chrome.runtime.getURL 로 패키징된 아이콘을 쓰고,
+   * 그렇지 않으면(미리보기 등) 상대 경로로 폴백한다.
+   * @param {number} size 픽셀 크기
+   * @returns {HTMLImageElement}
+   */
+  function makeBrandIcon(size) {
+    const img = document.createElement("img");
+    let src = "../icons/icon128.png"; // 미리보기(test/) 기준 폴백 경로
+    try {
+      if (chrome.runtime && typeof chrome.runtime.getURL === "function") {
+        src = chrome.runtime.getURL("icons/icon128.png");
+      }
+    } catch (e) {
+      /* 확장 컨텍스트가 아니면 폴백 경로 사용 */
+    }
+    img.src = src;
+    img.width = size;
+    img.height = size;
+    img.alt = "";
+    img.setAttribute("aria-hidden", "true");
+    img.className = "sl-brand-img";
+    return img;
+  }
+
+  /**
+   * 구역 유형 아이콘 SVG 문자열을 만든다. 알 수 없는 유형이면 기본 점 아이콘.
+   * @param {string} type size|wearing|material|wash
+   */
+  function zoneIconSvg(type) {
+    const inner = ZONE_ICONS[type] || '<circle cx="12" cy="12" r="4"/>';
+    return (
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" ' +
+      'stroke="currentColor" stroke-width="1.8" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' +
+      inner +
+      "</svg>"
+    );
+  }
+
   /** 플로팅 스마트 인덱스 렌더링 */
   function renderIndex(root) {
     // 이동 가능한 구역만, 실제 세로 순서로 정렬해 인덱스에 노출한다.
@@ -214,12 +268,8 @@
     brand.className = "sl-index__brand";
     const logo = document.createElement("span");
     logo.className = "sl-index__logo";
-    // 아래로 향하는 이중 셰브론(빠른 이동 상징) 로고 마크
-    logo.innerHTML =
-      '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" ' +
-      'stroke="#FFD300" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' +
-      '<polyline points="6 5 12 11 18 5"></polyline>' +
-      '<polyline points="6 13 12 19 18 13"></polyline></svg>';
+    // 실제 앱 아이콘 이미지를 로고로 사용한다. (확장 리소스 URL)
+    logo.appendChild(makeBrandIcon(20));
     const brandText = document.createElement("span");
     brandText.textContent = "ScroLess";
     brand.appendChild(logo);
@@ -249,7 +299,19 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "sl-index__item";
-      btn.textContent = zone.label;
+
+      // 유형별 아이콘 + 라벨 텍스트 구조.
+      const icon = document.createElement("span");
+      icon.className = "sl-index__icon";
+      icon.innerHTML = zoneIconSvg(zone.type);
+
+      const text = document.createElement("span");
+      text.className = "sl-index__label";
+      text.textContent = zone.label;
+
+      btn.appendChild(icon);
+      btn.appendChild(text);
+
       btn.addEventListener("click", () => {
         log("버튼 클릭:", zone.label, zone);
         // 클릭 시점에 좌표를 다시 계산해 레이아웃 변화에 대응한다.
@@ -258,6 +320,14 @@
         if (freshY !== null) {
           scrollToY(freshY);
         }
+        // 방금 누른 항목을 "현재 보고 있는 구역"으로 하이라이트한다.
+        // 같은 목록의 다른 항목에서는 활성 표시를 제거한다.
+        list.querySelectorAll(".sl-index__item.sl-active").forEach((el) => {
+          el.classList.remove("sl-active");
+          el.removeAttribute("aria-current");
+        });
+        btn.classList.add("sl-active");
+        btn.setAttribute("aria-current", "true");
       });
       list.appendChild(btn);
     });
@@ -365,9 +435,12 @@
    * 방식 A: 사용자가 툴바 아이콘을 눌렀을 때 호출된다.
    * (사용자가 이미 상세정보를 펼친 상태를 전제로 한다.)
    */
+  /**
+   * @returns {Promise<boolean>} 인덱스를 실제로 렌더링했으면 true (분석 성공)
+   */
   async function runAnalysis() {
     if (analyzing) {
-      return;
+      return false;
     }
     analyzing = true;
 
@@ -406,11 +479,8 @@
     }
 
     if (!data || !Array.isArray(data.zones) || data.zones.length === 0) {
-      if (!willAnalyze) {
-        // mock 모드인데 데이터가 없으면 조용히 종료
-        return;
-      }
-      return;
+      // 데이터가 없으면(mock 없음/분석 실패) 인덱스를 만들지 못한다.
+      return false;
     }
 
     const root = document.createElement("div");
@@ -420,6 +490,7 @@
     renderChips(root);
     renderIndex(root);
     renderAccessibleText(root);
+    return true;
   }
 
   /**
@@ -436,24 +507,36 @@
     fab.type = "button";
     fab.className = "sl-fab";
     fab.setAttribute("aria-label", "ScroLess로 상품 정보 분석하기");
-    fab.innerHTML =
-      '<span class="sl-fab__logo">' +
-      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" ' +
-      'stroke="#121212" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' +
-      '<polyline points="6 5 12 11 18 5"></polyline>' +
-      '<polyline points="6 13 12 19 18 13"></polyline></svg></span>' +
-      '<span class="sl-fab__label">정보 인덱스</span>';
+    const fabLogo = document.createElement("span");
+    fabLogo.className = "sl-fab__logo";
+    fabLogo.appendChild(makeBrandIcon(22));
+    const fabLabel = document.createElement("span");
+    fabLabel.className = "sl-fab__label";
+    fabLabel.textContent = "정보 인덱스";
+    fab.appendChild(fabLogo);
+    fab.appendChild(fabLabel);
 
     fab.addEventListener("click", async () => {
       fab.classList.add("sl-fab--busy");
       const label = fab.querySelector(".sl-fab__label");
-      const prev = label ? label.textContent : "";
       if (label) label.textContent = "분석 중…";
+      let ok = false;
       try {
-        await runAnalysis();
+        ok = await runAnalysis();
       } finally {
         fab.classList.remove("sl-fab--busy");
-        if (label) label.textContent = prev || "정보 인덱스";
+        if (label) {
+          // 분석에 성공해 인덱스가 떴으면 "다시 분석"으로 전환한다.
+          // (인덱스가 이미 화면에 있으므로 FAB 는 재분석 용도로 역할을 바꾼다.)
+          // 실패했으면 재시도를 유도하기 위해 원래 라벨로 되돌린다.
+          label.textContent = ok ? "다시 분석" : "정보 인덱스";
+        }
+        // 성공 시 상태를 클래스로도 표시해 스타일/시맨틱을 구분할 수 있게 한다.
+        fab.classList.toggle("sl-fab--reanalyze", ok);
+        fab.setAttribute(
+          "aria-label",
+          ok ? "ScroLess로 상품 정보 다시 분석하기" : "ScroLess로 상품 정보 분석하기"
+        );
       }
     });
 
