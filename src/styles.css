@@ -113,6 +113,25 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* 착용샷이 색상별로 많거나 구역이 많아도 인덱스가 화면을 벗어나지 않도록,
+   * 항목 목록이 뷰포트 높이를 넘으면 이 영역 안에서만 스크롤되게 한다.
+   * (헤더는 고정, 항목만 스크롤 → 모든 구역에 계속 접근 가능) */
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+  /* 스크롤바가 항목 텍스트를 가리지 않게 살짝 여백 */
+  padding-right: 2px;
+}
+
+/* 인덱스 항목 목록 스크롤바를 브랜드 톤으로 얇게 표시 */
+.sl-index__items::-webkit-scrollbar {
+  width: 6px;
+}
+.sl-index__items::-webkit-scrollbar-thumb {
+  background: var(--sl-border);
+  border-radius: 3px;
+}
+.sl-index__items::-webkit-scrollbar-thumb:hover {
+  background: var(--sl-text-muted);
 }
 
 .sl-index__item {
