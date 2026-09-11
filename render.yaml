@@ -21,6 +21,8 @@ services:
       - key: GEMINI_API_KEY
         sync: false            # 값은 대시보드에서 직접 입력 (저장소에 노출 안 됨)
       - key: GEMINI_MODEL
-        value: gemini-3.6-flash
+        # 무료 티어에서 하루 요청 한도(RPD)가 가장 넉넉한 저비용·저지연 모델.
+        # 이미지 입력을 지원해 상세이미지 분석에 적합하다.
+        value: gemini-3.1-flash-lite
       - key: NODE_VERSION
         value: "20"

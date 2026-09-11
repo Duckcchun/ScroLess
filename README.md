@@ -92,7 +92,7 @@ npm start                 # http://localhost:8787 에서 실행
 
 ### 모델 선택 참고
 
-- 기본 모델은 `gemini-3.6-flash` 입니다. **신규 API 계정은 Gemini 3.x 세대만 사용 가능**합니다
+- 기본 모델은 `gemini-3.1-flash-lite` 입니다(무료 티어 하루 한도가 넉넉하고 이미지 입력 지원). **신규 API 계정은 Gemini 3.x 세대만 사용 가능**합니다
   (2.5 계열은 신규 사용자 접근 불가). 모델은 `.env` 의 `GEMINI_MODEL` 로 바꿀 수 있습니다.
 - 계정에서 쓸 수 있는 모델 목록은 다음으로 확인합니다:
   `GET https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_KEY`

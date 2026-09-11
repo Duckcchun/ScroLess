@@ -52,7 +52,7 @@ app.get("/health", (req, res) => {
   res.json({
     ok: true,
     apiKeyConfigured: keySet,
-    model: process.env.GEMINI_MODEL || "gemini-3.6-flash",
+    model: process.env.GEMINI_MODEL || "gemini-3.1-flash-lite",
     cache: cache.stats(),
   });
 });

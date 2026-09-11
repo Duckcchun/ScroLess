@@ -9,7 +9,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { RESPONSE_SCHEMA, ANALYSIS_INSTRUCTION } from "./analysis-schema.js";
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 
 /** 키가 설정돼 있는지 확인하고, 없으면 명확한 에러를 던진다. */
 function getClient() {

@@ -15,7 +15,7 @@
 | 변수 | 설명 | 예시 |
 |---|---|---|
 | `GEMINI_API_KEY` | Gemini API 키 (필수) | `AIza...` |
-| `GEMINI_MODEL` | 사용할 모델 | `gemini-3.6-flash` |
+| `GEMINI_MODEL` | 사용할 모델 | `gemini-3.1-flash-lite` |
 | `PORT` | 리슨 포트 (플랫폼이 주입하기도 함) | `8787` |
 
 > 배포 플랫폼에서는 `.env` 파일 대신 플랫폼의 "환경변수/Secrets" 설정에 넣으세요.
