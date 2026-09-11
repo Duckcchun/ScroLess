@@ -78,7 +78,16 @@ app.post("/analyze", async (req, res) => {
     }
 
     const result = await analyzeImages(imageUrls);
-    cache.set(key, result);
+
+    // 빈 결과(zones/chips 모두 없음)는 캐시하지 않는다.
+    // 그렇지 않으면 일시적/부분적 실패가 24시간 동안 고착되어
+    // 재시도해도 계속 빈 결과만 돌려주게 된다.
+    const hasContent =
+      (Array.isArray(result.zones) && result.zones.length > 0) ||
+      (Array.isArray(result.chips) && result.chips.length > 0);
+    if (hasContent) {
+      cache.set(key, result);
+    }
     res.json({ ...result, cached: false });
   } catch (err) {
     console.error("[analyze] 오류:", err.message);
