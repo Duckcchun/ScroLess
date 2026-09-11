@@ -291,20 +291,48 @@
       }
     });
 
-    // 2) 뷰포트 진입 기반 로더 트리거: 아래로 훑고 원위치
+    // 2) 뷰포트 진입 기반 로더 트리거: 아래로 훑고 원위치.
+    //    브랜드스토어 등 SPA 는 스크롤로 이미지를 하나씩 DOM 에 채우고,
+    //    네트워크로 받아오는 데 시간이 걸린다. 그래서
+    //     - 스텝마다 충분히(150ms) 대기하고
+    //     - "수집 대상 이미지 수가 더 이상 늘지 않을 때까지" 여러 번 훑는다.
     const originalY = window.scrollY;
-    const totalHeight = Math.max(
-      document.body.scrollHeight,
-      document.documentElement.scrollHeight
-    );
-    const step = Math.max(window.innerHeight * 0.8, 400);
-    for (let y = 0; y < totalHeight; y += step) {
-      window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 60));
+
+    // 현재 스코프에서 상세이미지로 인정되는 개수를 센다. (안정화 판정용)
+    const countDetailImgs = () =>
+      Array.from(scope.querySelectorAll("img")).filter((im) =>
+        isDetailImage(im, resolveImageUrl(im), true)
+      ).length;
+
+    const sweepOnce = async () => {
+      const totalHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      );
+      const step = Math.max(window.innerHeight * 0.8, 400);
+      for (let y = 0; y < totalHeight; y += step) {
+        window.scrollTo(0, y);
+        await new Promise((r) => setTimeout(r, 150));
+      }
+      // 맨 아래까지 확실히 내려 마지막 이미지들까지 로드 유발
+      window.scrollTo(0, totalHeight);
+      await new Promise((r) => setTimeout(r, 250));
+    };
+
+    // 최대 4회까지, 이미지 수가 안정되면 조기 종료
+    let prevCount = -1;
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await sweepOnce();
+      const now = countDetailImgs();
+      if (now === prevCount) {
+        break; // 더 이상 늘지 않음 → 로드 완료로 간주
+      }
+      prevCount = now;
     }
+
     window.scrollTo(0, originalY);
-    // 로드가 반영될 짧은 여유
-    await new Promise((r) => setTimeout(r, 120));
+    // 로드가 반영될 여유
+    await new Promise((r) => setTimeout(r, 200));
   }
 
   /**
