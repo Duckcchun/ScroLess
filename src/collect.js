@@ -320,6 +320,17 @@
         isDetailImage(im, resolveImageUrl(im), true)
       ).length;
 
+    // 아직 실제 이미지가 로드되지 않은(placeholder 상태) 상세 후보 img 가 있는지.
+    // 하나도 없으면 스크롤로 더 로드시킬 게 없다는 뜻이라 스윕을 건너뛴다.
+    const hasUnloaded = () =>
+      Array.from(scope.querySelectorAll("img")).some((im) => {
+        const cur = im.currentSrc || im.src || "";
+        return !cur || PLACEHOLDER_SRC_RE.test(cur);
+      });
+
+    // 이 컨테이너가 품은 전체 img 개수(= 로드 완료 시 도달할 목표 상한)
+    const targetCount = scope.querySelectorAll("img").length;
+
     const sweepOnce = async () => {
       const totalHeight = Math.max(
         document.body.scrollHeight,
@@ -335,13 +346,22 @@
       await new Promise((r) => setTimeout(r, 250));
     };
 
-    // 최대 4회까지, 이미지 수가 안정되면 조기 종료
+    // 이미 전부 로드돼 있으면(사용자가 이미 훑어봄 등) 스크롤 자체를 생략한다.
+    if (!hasUnloaded()) {
+      return;
+    }
+
+    // 최대 4회까지 훑되,
+    //  - 목표(컨테이너 전체 img)만큼 상세이미지가 잡혔거나
+    //  - 미로드 이미지가 더 없거나
+    //  - 이미지 수가 더 늘지 않으면
+    // 즉시 종료한다. → 대부분 1회로 끝나 스크롤이 덜 티난다.
     let prevCount = -1;
     for (let attempt = 0; attempt < 4; attempt++) {
       await sweepOnce();
       const now = countDetailImgs();
-      if (now === prevCount) {
-        break; // 더 이상 늘지 않음 → 로드 완료로 간주
+      if (now >= targetCount || !hasUnloaded() || now === prevCount) {
+        break;
       }
       prevCount = now;
     }
