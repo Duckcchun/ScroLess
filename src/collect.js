@@ -105,7 +105,10 @@
   /**
    * 상세영역 컨테이너를 찾는다.
    * 1) 사이트 셀렉터 → 2) 범용 휴리스틱
-   * @returns {HTMLElement} 컨테이너 (없으면 document.body)
+   * @returns {{el: HTMLElement, trusted: boolean}}
+   *   trusted=true 면 사이트별 상세 본문 셀렉터로 정확히 찾은 컨테이너라는 뜻.
+   *   이 경우 그 안의 이미지들은 "이미 상세이미지"라는 강한 근거가 있으므로
+   *   크기 필터를 느슨하게 적용해도 된다. (잘린 조각들이 탈락하지 않게)
    */
   function findDetailContainer() {
     const profile = getSiteProfile();
@@ -113,11 +116,11 @@
       for (const sel of profile.selectors) {
         const el = document.querySelector(sel);
         if (el) {
-          return el;
+          return { el, trusted: true };
         }
       }
     }
-    return findContainerByHeuristic() || document.body;
+    return { el: findContainerByHeuristic() || document.body, trusted: false };
   }
 
   /**
@@ -184,21 +187,37 @@
    * 개별 이미지가 "상세이미지"로 적합한지 판단.
    * @param {HTMLImageElement} img
    * @param {string} url resolveImageUrl 로 구한 실제 URL
+   * @param {boolean} trusted 신뢰할 수 있는 상세 본문 컨테이너 안의 이미지인지.
+   *   true 면 크기 필터를 느슨하게 한다. (통이미지를 세로로 잘라 만든
+   *   납작한 조각들이 높이 문턱에 걸려 탈락하는 문제를 막는다.)
    */
-  function isDetailImage(img, url) {
+  function isDetailImage(img, url, trusted) {
     if (!url || EXCLUDE_SRC_RE.test(url)) {
       return false;
     }
     const r = img.getBoundingClientRect();
-    // 너무 작으면 아이콘/썸네일로 간주.
-    // (lazy 이미지는 아직 로드 전이라 크기가 0일 수 있으므로,
-    //  크기가 0이면 크기 조건은 통과시키고 영역/URL 조건으로만 판단한다.)
     const hasSize = r.width > 0 || r.height > 0;
+
     if (hasSize) {
-      const wideEnough = r.width >= 320;
-      const tallEnough = img.naturalHeight >= 200 || r.height >= 200;
-      if (!wideEnough || !tallEnough) {
-        return false;
+      if (trusted) {
+        // 신뢰 컨테이너 안: 이미 상세 본문이므로 크기 문턱을 대폭 낮춘다.
+        // 잘린 조각(넓고 납작한 배너/텍스트 띠 등)도 상세이미지로 인정한다.
+        // 명백한 아이콘(가로·세로 모두 아주 작음)만 제외한다.
+        const isTinyIcon = r.width < 80 && r.height < 80;
+        if (isTinyIcon) {
+          return false;
+        }
+        // 폭이 지나치게 좁은 장식용 세로선/구분자 정도만 추가로 배제
+        if (r.width < 100) {
+          return false;
+        }
+      } else {
+        // 신뢰할 수 없는(휴리스틱) 영역: 기존의 엄격한 크기 조건 유지
+        const wideEnough = r.width >= 320;
+        const tallEnough = img.naturalHeight >= 200 || r.height >= 200;
+        if (!wideEnough || !tallEnough) {
+          return false;
+        }
       }
     }
     // 노이즈 영역(광고/추천/리뷰 등) 안이면 제외
@@ -213,7 +232,7 @@
    * @returns {Array<{el: HTMLImageElement, url: string, pageY: number}>}
    */
   function collectDetailImages() {
-    const container = findDetailContainer();
+    const { el: container, trusted } = findDetailContainer();
     const scope = container.querySelectorAll ? container : document;
 
     const imgs = Array.from(scope.querySelectorAll("img"));
@@ -222,7 +241,7 @@
 
     imgs.forEach((img) => {
       const url = resolveImageUrl(img);
-      if (!isDetailImage(img, url)) {
+      if (!isDetailImage(img, url, trusted)) {
         return;
       }
       if (seen.has(url)) {
@@ -252,7 +271,7 @@
    * @returns {Promise<void>}
    */
   async function triggerLazyLoad() {
-    const container = findDetailContainer();
+    const { el: container } = findDetailContainer();
     const scope = container.querySelectorAll ? container : document;
     const imgs = Array.from(scope.querySelectorAll("img"));
 
